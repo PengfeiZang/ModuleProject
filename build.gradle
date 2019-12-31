@@ -1,0 +1,74 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        maven { url 'file:///Users/pengfeizang/work' }
+        
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.0'
+        
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+subprojects {
+    task allDeps(type: DependencyReportTask){}
+}
+
+//aar name 版本号
+def defaultVersions = [
+//        'toastmoudle'                  : '0.0.3',
+        'testmodule'                  : '1.0.0',
+]
+
+allprojects {
+    repositories {
+        maven { url 'file:///Users/pengfeizang/work' }
+        google()
+        jcenter()
+        
+    }
+    //将app中的依赖添加版本号
+    configurations.all {
+        resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+                if (details.requested.group == 'com.yitingyu.testmaven') {
+                    def defaultVersion = defaultVersions[details.requested.name]
+                    if (defaultVersion != null && !findProject(":${details.requested.name}")) {
+                        details.useVersion defaultVersion
+                    }
+                }
+            }
+        }
+
+        //如果是本地module，修改依赖方式，使用本地module
+        resolutionStrategy.dependencySubstitution.all { DependencySubstitution dependency ->
+            if (dependency.requested instanceof ModuleComponentSelector && dependency.requested.group == "com.yitingyu.testmaven") {
+                def targetProject = findProject(":${dependency.requested.module}")
+                if (targetProject != null) {
+                    dependency.useTarget targetProject
+                }
+            }
+        }
+
+    }
+
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    minSdkVersion = 16
+    targetSdkVersion = 26
+    compileSdkVersion = 28
+    buildToolsVersion = "28.0.2"
+    supportLibraryVersion = '27.1.1'
+    architectureVersion = "1.1.1"
+    junitVersion = '4.12'
+
+    versions = defaultVersions
+}

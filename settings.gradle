@@ -1,0 +1,24 @@
+Properties localProperties = new Properties();
+File localPropertiesFile = new File(rootDir.getAbsolutePath() + "/local.properties");
+if (null != localPropertiesFile && localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.newDataInputStream());
+}
+
+include ':app'
+
+static Boolean isActivatedProject(Properties properties, String projectName) {
+    String property = properties.getProperty(projectName);
+    return (null != property && property.toBoolean());
+}
+
+def moduleDir = "."
+
+if (isActivatedProject(localProperties, "toastmodule")) {
+    include ':toastmodule'
+    project(':toastmodule').projectDir = new File(settingsDir.getPath(), moduleDir + '/toastmodule')
+}
+if (isActivatedProject(localProperties, "testmodule")) {
+    include ':testmodule'
+    project(':testmodule').projectDir = new File(settingsDir.getPath(), moduleDir + '/testmodule/testmodule')
+}
+
